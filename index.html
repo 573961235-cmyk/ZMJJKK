@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>无畏契约·决斗者性格测试</title>
+<style>
+    *{margin:0;padding:0;box-sizing:border-box;font-family:"Microsoft Yahei",sans-serif;}
+    body{background:#0f141e;color:#fff;padding:20px;min-height:100vh;}
+    .container{max-width:600px;margin:0 auto;}
+    .head-box{text-align:center;margin-bottom:40px;}
+    h1{font-size:24px;color:#5D26FF;margin-bottom:8px;}
+    .tip{color:#b0c4de;font-size:14px;line-height:1.6;}
+    .progress-bar{width:100%;height:6px;background:#273444;border-radius:3px;margin:20px 0;overflow:hidden;}
+    .progress-inner{height:100%;background:linear-gradient(90deg,#5D26FF,#6A4CFF);transition:0.3s ease;}
+    .page-item{display:none;padding:20px 10px;}
+    .page-item.active{display:block;}
+    .q-title{font-size:16px;line-height:1.8;margin:30px 0 40px;text-align:center;}
+    .score-row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;}
+    .score-item{width:65px;height:65px;display:flex;align-items:center;justify-content:center;border-radius:8px;border:1px solid #334555;font-size:15px;color:#ccc;cursor:pointer;transition:0.2s;user-select:none;}
+    .score-item.active{background:#5D26FF;color:#fff;border-color:#6A4CFF;font-weight:bold;}
+    .btn-box{display:flex;gap:15px;margin-top:50px;justify-content:center;}
+    .prev-btn,.next-btn{padding:12px 28px;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;border:none;transition:0.2s;}
+    .prev-btn{background:transparent;color:#5D26FF;border:1px solid #6A4CFF;}
+    .next-btn{background:#5D26FF;color:#fff;}
+    .result-box{display:none;background:#1a2332;border:1px solid #6A4CFF;border-radius:12px;padding:28px;margin-top:20px;}
+    .res-name{font-size:26px;color:#5D26FF;font-weight:bold;text-align:center;margin-bottom:20px;}
+    .res-block{margin:15px 0;line-height:1.8;}
+    .res-block strong{color:#6A4CFF;}
+    .reset-btn{padding:12px 28px;background:transparent;color:#5D26FF;border:1px solid #6A4CFF;border-radius:8px;font-size:15px;font-weight:bold;cursor:pointer;margin:15px auto;display:block;}
+</style>
+</head>
+<body>
+<div class="container">
+    <div class="head-box">
+        <h1>无畏契约·决斗者性格测试</h1>
+        <div class="tip">凭第一直觉选择答案，每题选择后自动翻页</div>
+    </div>
+
+    <div class="progress-bar">
+        <div class="progress-inner" id="progress" style="width:0%"></div>
+    </div>
+
+    <div id="pageWrap"></div>
+
+    <div class="result-box" id="resBox">
+        <div class="res-name" id="resName"></div>
+        <div class="res-block"><strong>性格特质：</strong><span id="resText"></span></div>
+        <div class="res-block"><strong>适配决斗者：</strong><span id="resHero"></span></div>
+        <div class="res-block"><strong>适配VCT战队：</strong><span id="resTeam"></span></div>
+        <div class="res-block"><strong>适配理由：</strong><span id="resReason"></span></div>
+        <button class="reset-btn" onclick="allReset()">重新测试</button>
+    </div>
+</div>
+
+<script>
+const questions = [
+    {id:1,dim:"A",desc:"对局拿到优势，我会主动前压找对枪，不会原地保守卡点。"},
+    {id:2,dim:"A",desc:"枪械优势在手，我愿意主动单摸突破，撕开敌方防守防线。"},
+    {id:3,dim:"A",desc:"进入1V多残局，我更相信自身手感，主动找人博弈拼枪。"},
+    {id:4,dim:"A",desc:"开局不喜欢被动守点，总想主动找节奏、打进攻突破。"},
+    {id:5,dim:"A",desc:"我更喜欢快节奏干拉、瞬秒对枪，不喜欢拖沓磨点运营。"},
+    {id:6,dim:"B",desc:"玩决斗位习惯自己单走Carry，不依赖队友铺垫和道具辅助。"},
+    {id:7,dim:"B",desc:"对局中不爱频繁沟通，全程按照自己的节奏打法发挥。"},
+    {id:8,dim:"B",desc:"拿到优势时，优先自己收割拿人头，而非帮队友创造机会。"},
+    {id:9,dim:"B",desc:"讨厌全程跟大部队抱团，偏爱单带、绕后、单挑找机会。"},
+    {id:10,dim:"B",desc:"团队节奏拖沓时，我会自己单独找突破口带起对局节奏。"}
+];
+
+const resData = {
+    A1B1:{
+        name:"干就完了！",
+        text:"纯粹的进攻狂热爱好者，主打大胆突破、先手抢节奏！打法凶狠果敢、绝不畏缩，对局思路简单直接，干拉、前压、单摸突破样样敢打。全程靠手感和气势压制对手，信奉“主动出击就是最好的防守”，残局敢拼敢赌，擅长靠个人能力强行撕开战局、接管比赛，唯一小短板是偶尔激进冲动出现失误。",
+        hero:"芮娜、霓虹、壹决",
+        team:"PRX",
+        reason:"PRX主打极致个人进攻、快节奏突破，偏爱决斗位靠手感和本能撕开防线，极其适配你敢冲敢莽、自主Carry的打法风格，能最大化发挥你的单挑与前压优势。"
+    },
+    A1B2:{
+        name:"冷面杀手",
+        text:"冷静克制的顶尖对局杀手，人狠话少、操作极致！拥有激进的突破能力却不盲目冲动，心态沉稳、枪法精准，擅长精准抓对位破绽、瞬秒收割。不贪无效操作，不打无用莽冲，既能单人无解对位碾压对手，也能配合团队把控进攻节奏，无声接管战场，是赛场中极具压迫感的全能核心。",
+        hero:"捷风、夜露",
+        team:"EDG（CN赛区）",
+        reason:"CN赛区豪门EDG拥有成熟完备的战术体系与极强的赛场韧性，擅长灵活变阵、兼顾个人突破与团队协同。既给足决斗位单打收割、撕开防线的空间，又注重整体战术配合与残局把控，完美适配你全能均衡、能突能辅的打法，是最能发挥全能决斗上限的顶级战队。"
+    },
+    A2B1:{
+        name:"神秘人",
+        text:"赛场隐藏的博弈高手，打法神秘多变、让人捉摸不透！摒弃常规对线思路，擅长蹲点拉扯、绕后偷节奏、卡时间差打错位。表面低调佛系、毫无攻击性，实则心思缜密、拿捏所有对局细节，主打出其不意、后发制人，总能在对手松懈瞬间悄悄收割，凭细节和思路掌控全局。",
+        hero:"不死鸟",
+        team:"G2",
+        reason:"美洲G2主打灵活多变的战术博弈，擅长假转拉扯、错位偷节奏，不打无脑莽冲，主打精准时机把控与后发制人。完美契合你隐忍耐心、擅长细节博弈和残局抓机会的打法，能充分发挥你的拉扯运营、悄无声息终结对局的优势。"
+    },
+    A2B2:{
+        name:"团战英雄",
+        text:"妥妥的团队核心支柱，牺牲个人花哨操作、全心服务团队！打法稳健严谨、纪律性拉满，不贪人头、不搞个人秀，一切以团队胜利为核心。擅长用道具铺垫开路、配合队友同步推进，稳扎稳打盘活全队进攻节奏，兜底能力极强，是队伍攻坚破点、拿下胜利的关键团战英雄。",
+        hero:"雷兹",
+        team:"VIT（EMEA赛区）",
+        reason:"EMEA赛区豪门VIT以极致纪律性、稳健控图和教科书级团队协同著称，打法严谨规整、极少出现无效失误。完美适配你优先团队、稳扎稳打的决斗风格，擅长依托道具铺垫配合体系推进，你的稳健突破与低失误打法，能高度契合VIT的战术执行节奏，是队伍最适配的体系型决斗核心。"
+    }
+};
+
+let nowPage = 0;
+let answerArr = {};
+const totalPage = questions.length;
+
+function renderPage(){
+    let html = "";
+    questions.forEach((item,idx)=>{
+        html += `
+        <div class="page-item ${idx===0?'active':''}" data-page="${idx}">
+            <div class="q-title">${idx+1}. ${item.desc}</div>
+            <div class="score-row">
+                <div class="score-item" data-val="1" data-q="${idx+1}">1</div>
+                <div class="score-item" data-val="2" data-q="${idx+1}">2</div>
+                <div class="score-item" data-val="3" data-q="${idx+1}">3</div>
+                <div class="score-item" data-val="4" data-q="${idx+1}">4</div>
+                <div class="score-item" data-val="5" data-q="${idx+1}">5</div>
+            </div>
+            <div class="btn-box">
+                ${idx>0?`<button class="prev-btn" onclick="prevPage()">上一题</button>`:''}
+                ${idx===totalPage-1
+                    ?`<button class="next-btn" onclick="countResult()">查看结果</button>`
+                    :`<button class="next-btn" onclick="nextPage()">下一题</button>`
+                }
+            </div>
+        </div>
+        `
+    })
+    document.getElementById("pageWrap").innerHTML = html;
+    updateProgress();
+
+    document.querySelectorAll(".score-item").forEach(item=>{
+        item.addEventListener('click', function(){
+            let qid = parseInt(this.dataset.q);
+            let val = parseInt(this.dataset.val);
+            answerArr[qid] = val;
+
+            let pageDom = document.querySelector(`.page-item[data-page="${nowPage}"]`);
+            pageDom.querySelectorAll(".score-item").forEach(el=>el.classList.remove("active"));
+            this.classList.add("active");
+
+            setTimeout(()=>{
+                if(nowPage < totalPage - 1){
+                    nextPage();
+                }else{
+                    countResult();
+                }
+            },350);
+        })
+    })
+}
+
+function prevPage(){
+    if(nowPage <= 0) return;
+    document.querySelector(`.page-item[data-page="${nowPage}"]`).classList.remove("active");
+    nowPage--;
+    document.querySelector(`.page-item[data-page="${nowPage}"]`).classList.add("active");
+    updateProgress();
+}
+
+function nextPage(){
+    if(nowPage >= totalPage-1) return;
+    document.querySelector(`.page-item[data-page="${nowPage}"]`).classList.remove("active");
+    nowPage++;
+    document.querySelector(`.page-item[data-page="${nowPage}"]`).classList.add("active");
+    updateProgress();
+}
+
+function updateProgress(){
+    let per = (nowPage / totalPage) * 100;
+    document.getElementById("progress").style.width = per + "%";
+}
+
+function countResult(){
+    let A = {bold:0,steady:0};
+    let B = {team:0,solo:0};
+    let isAllDone = true;
+    questions.forEach((item,idx)=>{
+        let num = answerArr[idx+1];
+        if(num===undefined) isAllDone=false;
+        if(item.dim === "A"){
+            if(num===1||num===2) A.steady++;
+            if(num===4||num===5) A.bold++;
+        }
+        if(item.dim === "B"){
+            if(num===1||num===2) B.team++;
+            if(num===4||num===5) B.solo++;
+        }
+    })
+    if(!isAllDone) return alert("请完成所有题目选择！");
+    let Ares = A.bold > A.steady ? "1" : "2";
+    let Bres = B.solo > B.team ? "1" : "2";
+    let key = "A"+Ares+"B"+Bres;
+    let data = resData[key];
+    document.getElementById("resName").innerText = data.name;
+    document.getElementById("resText").innerText = data.text;
+    document.getElementById("resHero").innerText = data.hero;
+    document.getElementById("resTeam").innerText = data.team;
+    document.getElementById("resReason").innerText = data.reason;
+    document.getElementById("resBox").style.display = "block";
+    window.scrollTo(0,document.body.scrollHeight);
+}
+
+function allReset(){
+    nowPage = 0;
+    answerArr = {};
+    document.querySelectorAll(".page-item").forEach(el=>el.classList.remove("active"));
+    document.querySelector(`.page-item[data-page="0"]`).classList.add("active");
+    document.querySelectorAll(".score-item").forEach(el=>el.classList.remove("active"));
+    document.getElementById("resBox").style.display = "none";
+    updateProgress();
+    window.scrollTo(0,0);
+}
+
+window.onload = renderPage;
+</script>
+</body>
+</html>
